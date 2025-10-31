@@ -295,7 +295,7 @@ const Overview = lazy(() => import('./Sections/overview/Overview'));
 const MealsManagement = lazy(() => import('./Sections/Meal/Meal'));
 const UsersManagement = lazy(() => import('./Sections/User/User'));
 const SchoolManagement = lazy(() => import('./Sections/School/School'));
-const Settings = lazy(() => import('./sections/Settings/Settings'));
+const Settings = lazy(() => import('./Sections/Settings/Settings'));
 
 const AdminDashboardPage = () => {
   const { darkMode, toggleTheme } = useThemeTrigger();
