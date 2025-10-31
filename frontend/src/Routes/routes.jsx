@@ -4,7 +4,7 @@ const VendorDashboardPage = lazy(()=> import("../pages/Dashboard/VendorDashboard
 const UserDashboardPage =  lazy(()=> import("../pages/Dashboard/UserDashboard/UserDashboardPage.jsx"))
 const LoginPage = lazy(() => import("../pages/LoginPage/LoginPage.jsx"));
 const HomePage = lazy(() => import("../pages/homePage/HomePage.jsx"));
-const NotFoundPage = lazy(() => import("../Pages/error-pages/NotFoundPage.jsx"));
+const NotFoundPage = lazy(() => import("../pages/error-pages/NotFoundPage.jsx"));
 const SchoolMealPage = lazy(() => import("../pages/SchoolMealPage/SchoolMealPage.jsx"));
 const FAQPage = lazy(() => import("../pages/FAQPage/FAQPage.jsx"));
 const TermsAndConditionsPage = lazy(() => import("../pages/TermsAndConditionsPage/TermsAndConditionsPage.jsx"));
