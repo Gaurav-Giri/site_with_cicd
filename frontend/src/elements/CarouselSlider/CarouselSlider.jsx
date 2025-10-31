@@ -1,7 +1,7 @@
 // CarouselSlider.jsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useThemeTrigger } from '../../ThemeTrigger'; // Adjust path as needed
-import styles from './CarouselSlider.module.css';
+import styles from './Carouselslider.module.css';
 
 const CarouselSlider = () => {
   const { darkMode } = useThemeTrigger();
