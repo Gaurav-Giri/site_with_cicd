@@ -130,7 +130,7 @@
 import React, { useState } from 'react';
 import { useThemeTrigger } from '../../ThemeTrigger'; // Adjust path as needed
 import searchIcon from '../../../public/images/search.png';
-import searchIconWhite from '../../../public/images/Search.png'; // You'll need to add this
+import searchIconWhite from '../../../public/images/search.png'; // You'll need to add this
 import styles from './SearchBar.module.css';
 
 const SearchBar = ({ onSearch, placeholder = "Search for your school..." }) => {
