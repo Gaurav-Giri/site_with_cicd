@@ -14,9 +14,9 @@ services:
       - "5000:5000"
     environment:
       - NODE_ENV=development
-      - MONGODB_URI=mongodb://host.docker.internal:27017/mernapp
+      - MONGO_URI=mongodb://host.docker.internal:27017/gmail_auth
       - RABBITMQ_URL=amqp://host.docker.internal:5672
-      - JWT_SECRET=your-jwt-secret-key-here
+      - JWT_SECRET=your_super_secret_key
       - CLIENT_URL=http://localhost:3000
     extra_hosts:
       - "host.docker.internal:host-gateway"

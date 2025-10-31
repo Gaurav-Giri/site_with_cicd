@@ -30,9 +30,9 @@ pipeline {
                     writeFile file: './backend/.env', text: """
                     NODE_ENV=development
                     PORT=5000
-                    MONGODB_URI=mongodb://localhost:27017/mernapp
+                    MONGODB_URI=mongodb://localhost:27017/gmail_auth
                     RABBITMQ_URL=amqp://localhost:5672
-                    JWT_SECRET=your-jwt-secret-key-here
+                    JWT_SECRET=your_super_secret_key
                     CLIENT_URL=http://localhost:3000
                     """
                 }
