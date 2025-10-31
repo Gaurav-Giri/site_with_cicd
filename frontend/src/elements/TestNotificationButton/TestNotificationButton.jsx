@@ -1,6 +1,6 @@
 // components/TestNotificationButton.jsx
 import React, { useState } from "react";
-import { createNotification } from "../../Api/NotificationApi.js";
+import { createNotification } from "../../API/NotificationApi.js";
 import styles from "./TestNotificationButton.module.css";
 
 const TestNotificationButton = () => {
