@@ -1,5 +1,5 @@
 import React from 'react';
-import { useThemeTrigger } from '../../ThemeTrigger';
+import { useThemeTrigger } from '../../ThemeTrigger.jsx';
 import './TermsAndConditionsPage.css';
 
 const TermsAndConditionsPage = () => {

@@ -4,8 +4,8 @@ import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ROUTES } from "./Routes/routes.jsx";
 import MainLayout from "./MainLayout";
-import { ThemeTriggerProvider } from "./ThemeTrigger"; 
-import { AuthProvider } from "./AuthContext";
+import { ThemeTriggerProvider } from "./ThemeTrigger.jsx"; 
+import { AuthProvider } from "./AuthContext.jsx";
 import { SocketProvider } from "./SocketContext.jsx";
 const LoadingSpinner = () => (
   <div

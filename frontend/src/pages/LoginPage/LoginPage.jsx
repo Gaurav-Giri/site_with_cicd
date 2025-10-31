@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import EmailForm from "../../elements/login/EmailForm/EmailForm";
-import OTPVerification from "../../elements/login/OTPForm/OTPForm";
-import UserDetailsForm from "../../elements/login/UserDetailsForm/UserDetailsForm";
-import { useAuth } from "../../AuthContext";
-import { useThemeTrigger } from "../../ThemeTrigger"; // Import the theme hook
+import EmailForm from "../../elements/login/EmailForm/EmailForm.jsx";
+import OTPVerification from "../../elements/login/OTPForm/OTPForm.jsx";
+import UserDetailsForm from "../../elements/login/UserDetailsForm/UserDetailsForm.jsx";
+import { useAuth } from "../../AuthContext.jsx";
+import { useThemeTrigger } from "../../ThemeTrigger.jsx"; // Import the theme hook
 import styles from "./LoginPage.module.css"; // Specific CSS Module
 
 function LoginPage() {

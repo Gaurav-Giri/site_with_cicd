@@ -219,11 +219,11 @@
 
 
 import React, { useState, useEffect } from "react";
-import { getSchools, searchSchools } from "../../API/School_api";
+import { getSchools, searchSchools } from "../../API/School_api.js";
 import styles from "./SchoolListPage.module.css";
-import SearchBar from "../../elements/SearchBar/SearchBar";
-import SchoolCard from "../../elements/SchoolCard/SchoolCard";
-import { useThemeTrigger } from "../../ThemeTrigger";
+import SearchBar from "../../elements/SearchBar/SearchBar.jsx";
+import SchoolCard from "../../elements/SchoolCard/SchoolCard.jsx";
+import { useThemeTrigger } from "../../ThemeTrigger.jsx";
 
 const SchoolListPage = () => {
   const [search, setSearch] = useState("");
