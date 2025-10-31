@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import EmailForm from "../../elements/login/EmailForm/EmailForm.jsx";
+import EmailForm from "../../elements/login/Emailform/EmailForm.jsx";
 import OTPVerification from "../../elements/login/OTPForm/OTPForm.jsx";
 import UserDetailsForm from "../../elements/login/UserDetailsForm/UserDetailsForm.jsx";
 import { useAuth } from "../../AuthContext.jsx";
