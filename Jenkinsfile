@@ -1,7 +1,6 @@
 // pipeline {
 //     agent any
 
-
 //     environment {
 //         DOCKER_IMAGE = 'frontend-react-app'
 //     }
@@ -89,7 +88,7 @@ pipeline {
                     writeFile file: './backend/.env', text: """
                     NODE_ENV=production
                     PORT=5000
-                    MONGO_URI=mongodb://localhost:27017/gmail_auth
+                    MONGODB_URI=mongodb://localhost:27017/gmail_auth
                     RABBITMQ_URL=amqp://rabbitmq:5672
                     JWT_SECRET=your_super_secret_key
                     CLIENT_URL=http://localhost:3000
