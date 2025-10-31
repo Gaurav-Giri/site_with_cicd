@@ -1,7 +1,7 @@
 // ContactUsPage.jsx
 import React, { useState } from 'react';
 import { useThemeTrigger } from '../../ThemeTrigger';
-import './ContactUsPage.css';
+import './contactUsPage.css';
 
 const ContactUsPage = () => {
   const { darkMode } = useThemeTrigger();
