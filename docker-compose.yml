@@ -1,7 +1,7 @@
 
 # ----------docker compose without mongo, rabbit-------
 
-version: '3.8'
+
 
 services:
   backend:
@@ -24,12 +24,12 @@ services:
       - ./backend:/app
       - /app/node_modules
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "health-check.js"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
+    # healthcheck:
+    #   test: ["CMD", "node", "health-check.js"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 40s
 
   frontend:
     image: mern-frontend:latest
@@ -42,9 +42,9 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
+    # healthcheck:
+    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 40s
