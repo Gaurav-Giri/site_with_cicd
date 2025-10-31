@@ -1195,7 +1195,7 @@ import {
   markAsRead, 
   markAllAsRead,
   getUnreadCount
-} from '../../Api/NotificationApi';
+} from '../../API/NotificationApi';
 import { useSocket } from '../../SocketContext';
 import { useAuth } from '../../AuthContext';
 
