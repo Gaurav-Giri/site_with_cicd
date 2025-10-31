@@ -4,7 +4,7 @@ import OTPVerification from "../../elements/login/OTPForm/OTPForm.jsx";
 import UserDetailsForm from "../../elements/login/UserDetailsForm/UserDetailsForm.jsx";
 import { useAuth } from "../../AuthContext.jsx";
 import { useThemeTrigger } from "../../ThemeTrigger.jsx"; // Import the theme hook
-import styles from "./LoginPage.module.css"; // Specific CSS Module
+import styles from "./loginPage.module.css"; // Specific CSS Module
 
 function LoginPage() {
   const { login } = useAuth();
