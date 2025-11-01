@@ -33,6 +33,8 @@ pipeline {
                     MONGODB_URI=mongodb://localhost:27017/gmail_auth
                     RABBITMQ_URL=amqp://localhost:5672
                     JWT_SECRET=your_super_secret_key
+                    EMAIL_USER=mr.anonymous9pro999@gmail.com
+                    EMAIL_PASS=uokp tari qsyd odqc
                     CLIENT_URL=http://localhost:3000
                     """
                 }
