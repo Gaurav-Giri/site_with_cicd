@@ -23,9 +23,9 @@ pipeline {
                 script {
                     // Create .env files for development
                     writeFile file: './frontend/.env', text: """
-                    REACT_APP_API_URL=http://localhost:5000
+                    REACT_APP_API_URL=https://backend.nightlybuilds.online
                     
-                    REACT_APP_WS_URL=ws://localhost:5000
+                    REACT_APP_WS_URL=ws://backend.nightlybuilds.online
                     """
                     
                     writeFile file: './backend/.env', text: """
