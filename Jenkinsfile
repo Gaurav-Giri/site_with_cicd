@@ -24,6 +24,7 @@ pipeline {
                     // Create .env files for development
                     writeFile file: './frontend/.env', text: """
                     REACT_APP_API_URL=http://localhost:5000
+                    
                     REACT_APP_WS_URL=ws://localhost:5000
                     """
                     
@@ -35,7 +36,7 @@ pipeline {
                     JWT_SECRET=your_super_secret_key
                     EMAIL_USER=mr.anonymous9pro999@gmail.com
                     EMAIL_PASS=uokp tari qsyd odqc
-                    CLIENT_URL=http://localhost:3000
+                    CLIENT_URL=http://localhost:3000, https://frontend.nightlybuilds.online
                     """
                 }
             }

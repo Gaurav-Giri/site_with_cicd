@@ -268,6 +268,7 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
+      "https://frontend.nightlybuilds.online",
       "http://localhost:3000",
       "http://127.0.0.1:3000",
       "http://10.213.228.153:3000",

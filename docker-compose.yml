@@ -19,7 +19,7 @@ services:
       - JWT_SECRET=your_super_secret_key
       - EMAIL_USER=mr.anonymous9pro999@gmail.com
       - EMAIL_PASS=uokp tari qsyd odqc
-      - CLIENT_URL=http://localhost:3000
+      - CLIENT_URL=http://localhost:3000, https://frontend.nightlybuilds.online
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
