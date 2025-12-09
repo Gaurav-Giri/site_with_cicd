@@ -1,9 +1,32 @@
-
-# ----------docker compose without mongo, rabbit-------
-
-
-
 services:
+  mongodb:
+    image: mongo:latest
+    container_name: mern-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=gmail_auth
+    restart: unless-stopped
+    networks:
+      - mern-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: mern-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    networks:
+      - mern-network
+
   backend:
     image: mern-backend:latest
     container_name: mern-backend
@@ -14,18 +37,21 @@ services:
       - "5000:5000"
     environment:
       - NODE_ENV=development
-      - MONGO_URI=mongodb://host.docker.internal:27017/gmail_auth
-      - RABBITMQ_URL=amqp://host.docker.internal:5672
+      - MONGODB_URI=mongodb://mongodb:27017/gmail_auth
+      - RABBITMQ_URL=amqp://rabbitmq:5672
       - JWT_SECRET=your_super_secret_key
       - EMAIL_USER=mr.anonymous9pro999@gmail.com
       - EMAIL_PASS=uokp tari qsyd odqc
       - CLIENT_URL=http://localhost:3000, https://frontend.nightlybuilds.online
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend:/app
       - /app/node_modules
+    depends_on:
+      - mongodb
+      - rabbitmq
     restart: unless-stopped
+    networks:
+      - mern-network
     # healthcheck:
     #   test: ["CMD", "node", "health-check.js"]
     #   interval: 30s
@@ -41,14 +67,25 @@ services:
       dockerfile: Dockerfile.frontend
     ports:
       - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+      - REACT_APP_WS_URL=ws://localhost:5000
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - mern-network
     # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+    #   test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
     #   interval: 30s
     #   timeout: 10s
     #   retries: 5
     #   start_period: 40s
 
-    
+volumes:
+  mongodb_data:
+  rabbitmq_data:
+
+networks:
+  mern-network:
+    driver: bridge
