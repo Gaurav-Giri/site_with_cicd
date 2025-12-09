@@ -1,6 +1,6 @@
 pipeline {
-    agent any
-
+    agent none  // No global agent
+    
     environment {
         FRONTEND_IMAGE = 'mern-frontend'
         BACKEND_IMAGE = 'mern-backend'
@@ -9,15 +9,16 @@ pipeline {
 
     stages {
         stage('Checkout Code') {
+            agent any  // Use any agent for checkout
             steps {
                 checkout scm
             }
         }
 
         stage('Setup Environment') {
+            agent any
             steps {
                 script {
-                    // Create .env files for development
                     writeFile file: './frontend/.env', text: """
                     REACT_APP_API_URL=https://backend.nightlybuilds.online
                     REACT_APP_WS_URL=ws://backend.nightlybuilds.online
@@ -38,6 +39,12 @@ pipeline {
         }
 
         stage('Install Dependencies') {
+            agent {
+                docker {
+                    image 'node:22-alpine'
+                    reuseNode true
+                }
+            }
             parallel {
                 stage('Frontend Dependencies') {
                     steps {
@@ -57,6 +64,12 @@ pipeline {
         }
 
         stage('Run Tests') {
+            agent {
+                docker {
+                    image 'node:22-alpine'
+                    reuseNode true
+                }
+            }
             parallel {
                 stage('Frontend Tests') {
                     steps {
@@ -76,6 +89,12 @@ pipeline {
         }
 
         stage('Build Applications') {
+            agent {
+                docker {
+                    image 'node:22-alpine'
+                    reuseNode true
+                }
+            }
             parallel {
                 stage('Build React App') {
                     steps {
@@ -95,42 +114,46 @@ pipeline {
         }
 
         stage('Build Docker Images') {
+            agent {
+                docker {
+                    image 'docker:latest'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                    reuseNode true
+                }
+            }
             steps {
                 script {
-                    sh "docker build -t ${FRONTEND_IMAGE}:${DOCKER_TAG} -f frontend/Dockerfile.frontend ./frontend"
-                    sh "docker build -t ${BACKEND_IMAGE}:${DOCKER_TAG} -f backend/Dockerfile.backend ./backend"
+                    sh '''
+                    docker build -t ${FRONTEND_IMAGE}:${DOCKER_TAG} -f frontend/Dockerfile.frontend ./frontend
+                    docker build -t ${BACKEND_IMAGE}:${DOCKER_TAG} -f backend/Dockerfile.backend ./backend
+                    '''
                 }
             }
         }
 
         stage('Deploy with Docker Compose') {
+            agent {
+                docker {
+                    image 'docker/compose:latest'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                    reuseNode true
+                }
+            }
             steps {
                 script {
-                    // Stop and start only frontend and backend services
                     sh '''
                     docker compose down frontend backend || echo "No frontend/backend containers to stop"
                     docker compose up -d frontend backend
-                    '''
                     
-                    // Wait for services to start (Linux-compatible wait)
-                    sh '''
-                    timeout=60
-                    interval=5
-                    while [ $timeout -gt 0 ]; do
-                        if docker ps --filter "name=mern-" --format "table {{.Names}}\t{{.Status}}" | grep -q "Up"; then
-                            echo "Services are running"
-                            break
-                        fi
-                        sleep $interval
-                        timeout=$((timeout - interval))
-                        echo "Waiting for services to start... (${timeout}s remaining)"
-                    done
-                    '''
+                    # Wait for services
+                    sleep 10
                     
-                    // Health checks (Linux compatible)
-                    sh '''
-                    curl -f http://localhost:3000 > /dev/null 2>&1 && echo "Frontend is running" || echo "Frontend health check failed but continuing"
-                    curl -f http://localhost:5000/health > /dev/null 2>&1 && echo "Backend is running" || echo "Backend health check failed but continuing"
+                    # Check if services are running
+                    if docker ps --filter "name=mern-" | grep -q "Up"; then
+                        echo "✅ Services are running"
+                    else
+                        echo "⚠️  Services may not be fully started"
+                    fi
                     '''
                 }
             }
@@ -143,13 +166,26 @@ pipeline {
         }
         success {
             echo '✅ MERN Stack CI/CD Pipeline completed successfully!'
-            sh 'docker ps --filter "name=mern-" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+            script {
+                sh '''
+                docker ps --filter "name=mern-" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "Cannot list containers"
+                '''
+            }
         }
         failure {
-            echo '❌ Pipeline failed, but containers are preserved for debugging'
-            sh 'docker ps -a --filter "name=mern-" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
-            sh 'docker logs mern-backend 2>/dev/null || echo "Backend container not found"'
-            sh 'docker logs mern-frontend 2>/dev/null || echo "Frontend container not found"'
+            echo '❌ Pipeline failed'
+            script {
+                sh '''
+                echo "=== Docker Containers ==="
+                docker ps -a --filter "name=mern-" 2>/dev/null || echo "Docker not available"
+                echo ""
+                echo "=== Frontend Logs ==="
+                docker logs mern-frontend --tail 50 2>/dev/null || echo "Frontend container not found"
+                echo ""
+                echo "=== Backend Logs ==="
+                docker logs mern-backend --tail 50 2>/dev/null || echo "Backend container not found"
+                '''
+            }
         }
     }
 }
