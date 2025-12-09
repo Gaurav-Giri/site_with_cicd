@@ -1,7 +1,3 @@
-// ---------------jenkinsfile for local testing without mongo, rabbitmq in contianer--------------
-
-
-
 pipeline {
     agent any
 
@@ -24,7 +20,6 @@ pipeline {
                     // Create .env files for development
                     writeFile file: './frontend/.env', text: """
                     REACT_APP_API_URL=https://backend.nightlybuilds.online
-                    
                     REACT_APP_WS_URL=ws://backend.nightlybuilds.online
                     """
                     
@@ -47,14 +42,14 @@ pipeline {
                 stage('Frontend Dependencies') {
                     steps {
                         dir('frontend') {
-                            bat 'npm install'
+                            sh 'npm install'
                         }
                     }
                 }
                 stage('Backend Dependencies') {
                     steps {
                         dir('backend') {
-                            bat 'npm install'
+                            sh 'npm install'
                         }
                     }
                 }
@@ -66,14 +61,14 @@ pipeline {
                 stage('Frontend Tests') {
                     steps {
                         dir('frontend') {
-                            bat 'npm test -- --watchAll=false --passWithNoTests || echo "Frontend tests completed with warnings"'
+                            sh 'npm test -- --watchAll=false --passWithNoTests || echo "Frontend tests completed with warnings"'
                         }
                     }
                 }
                 stage('Backend Tests') {
                     steps {
                         dir('backend') {
-                            bat 'npm test -- --passWithNoTests || echo "Backend tests completed with warnings"'
+                            sh 'npm test -- --passWithNoTests || echo "Backend tests completed with warnings"'
                         }
                     }
                 }
@@ -85,14 +80,14 @@ pipeline {
                 stage('Build React App') {
                     steps {
                         dir('frontend') {
-                            bat 'npm run build'
+                            sh 'npm run build'
                         }
                     }
                 }
                 stage('Build Backend') {
                     steps {
                         dir('backend') {
-                            bat 'npm run build || echo "Backend build completed"'
+                            sh 'npm run build || echo "Backend build completed"'
                         }
                     }
                 }
@@ -102,8 +97,8 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    bat "docker build -t ${FRONTEND_IMAGE}:${DOCKER_TAG} -f frontend/Dockerfile.frontend ./frontend"
-                    bat "docker build -t ${BACKEND_IMAGE}:${DOCKER_TAG} -f backend/Dockerfile.backend ./backend"
+                    sh "docker build -t ${FRONTEND_IMAGE}:${DOCKER_TAG} -f frontend/Dockerfile.frontend ./frontend"
+                    sh "docker build -t ${BACKEND_IMAGE}:${DOCKER_TAG} -f backend/Dockerfile.backend ./backend"
                 }
             }
         }
@@ -112,18 +107,30 @@ pipeline {
             steps {
                 script {
                     // Stop and start only frontend and backend services
-                    bat '''
-                    docker-compose down frontend backend || echo "No frontend/backend containers to stop"
-                    docker-compose up -d frontend backend
+                    sh '''
+                    docker compose down frontend backend || echo "No frontend/backend containers to stop"
+                    docker compose up -d frontend backend
                     '''
                     
-                    // Wait for services to start
-                    bat 'timeout 60 bash -c "until docker ps --filter \"name=mern-\" --format \"table {{.Names}}\t{{.Status}}\" | grep -q \"Up\"; do sleep 5; echo \"Waiting for services to start...\"; done"'
+                    // Wait for services to start (Linux-compatible wait)
+                    sh '''
+                    timeout=60
+                    interval=5
+                    while [ $timeout -gt 0 ]; do
+                        if docker ps --filter "name=mern-" --format "table {{.Names}}\t{{.Status}}" | grep -q "Up"; then
+                            echo "Services are running"
+                            break
+                        fi
+                        sleep $interval
+                        timeout=$((timeout - interval))
+                        echo "Waiting for services to start... (${timeout}s remaining)"
+                    done
+                    '''
                     
-                    // Health checks
-                    bat '''
-                    curl -f http://localhost:3000 > nul 2>&1 && echo "Frontend is running" || echo "Frontend health check failed but continuing"
-                    curl -f http://localhost:5000/health > nul 2>&1 && echo "Backend is running" || echo "Backend health check failed but continuing"
+                    // Health checks (Linux compatible)
+                    sh '''
+                    curl -f http://localhost:3000 > /dev/null 2>&1 && echo "Frontend is running" || echo "Frontend health check failed but continuing"
+                    curl -f http://localhost:5000/health > /dev/null 2>&1 && echo "Backend is running" || echo "Backend health check failed but continuing"
                     '''
                 }
             }
@@ -136,13 +143,13 @@ pipeline {
         }
         success {
             echo '✅ MERN Stack CI/CD Pipeline completed successfully!'
-            bat 'docker ps --filter "name=mern-" --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"'
+            sh 'docker ps --filter "name=mern-" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
         }
         failure {
             echo '❌ Pipeline failed, but containers are preserved for debugging'
-            bat 'docker ps -a --filter "name=mern-" --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"'
-            bat 'docker logs mern-backend || echo "Backend container not found"'
-            bat 'docker logs mern-frontend || echo "Frontend container not found"'
+            sh 'docker ps -a --filter "name=mern-" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+            sh 'docker logs mern-backend 2>/dev/null || echo "Backend container not found"'
+            sh 'docker logs mern-frontend 2>/dev/null || echo "Frontend container not found"'
         }
     }
 }
