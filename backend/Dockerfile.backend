@@ -17,7 +17,7 @@ RUN adduser -S nodejs -u 1001
 EXPOSE 5000
 
 # Health check script
-#COPY health-check.js ./
+COPY health-check.js ./
 
 # Start the application with development settings
 CMD ["npm", "run", "dev"]
