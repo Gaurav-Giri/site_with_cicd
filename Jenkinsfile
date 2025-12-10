@@ -109,8 +109,8 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker compose down frontend backend || echo "No containers to stop"
-                    docker compose up -d frontend backend
+                    docker-compose down frontend backend || echo "No containers to stop"
+                    docker-compose up -d frontend backend
                     '''
 
                     // Wait for services
