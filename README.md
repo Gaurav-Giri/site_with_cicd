@@ -3,6 +3,7 @@ to get started you have to enable gmail smtp service in you gmail account and in
 alon with other .env secret codes .
 happy coding !
 
+EDIT: THIS IS THE CI/CD VERSION OF MY REPO NAMED MERN STACK RMQ SIO
 
 
 
