@@ -519,7 +519,7 @@ pipeline {
 
     environment {
         FRONTEND_IMAGE = 'frontend'
-        BACKEND_IMAGE = 'mern-backend'
+        BACKEND_IMAGE = 'backend'
         DOCKER_TAG = "${BUILD_NUMBER}"
         COMPOSE_FILE = 'docker-compose.yml'
 
