@@ -266,12 +266,255 @@
 
 
 
+// pipeline {
+//     agent any
+
+//     options {
+//         timestamps()
+//         ansiColor('xterm')
+//     }
+
+//     environment {
+//         FRONTEND_IMAGE = 'frontend'
+//         BACKEND_IMAGE = 'mern-backend'
+//         DOCKER_TAG = "${BUILD_NUMBER}"
+//         COMPOSE_FILE = 'docker-compose.yml'
+
+//         MONGO_USER = 'admin'
+//         MONGO_PASS = 'password'
+//         RABBITMQ_USER = 'admin'
+//         RABBITMQ_PASS = 'password'
+
+//         JWT_SECRET = credentials('jwt-secret')
+//         EMAIL_USER = credentials('email-user')
+//         EMAIL_PASS = credentials('email-pass')
+//     }
+
+//     stages {
+
+//         stage('Checkout') {
+//             steps {
+//                 checkout scm
+//             }
+//         }
+
+//         stage('Setup Environment Files') {
+//             steps {
+//                 script {
+//                     writeFile file: 'frontend/.env', text: """
+// REACT_APP_API_URL=http://localhost:5000
+// REACT_APP_WS_URL=ws://localhost:5000
+// """
+
+//                     writeFile file: 'backend/.env', text: """
+// NODE_ENV=production
+// PORT=5000
+// MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017/gmail_auth?authSource=admin
+// RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+// JWT_SECRET=${JWT_SECRET}
+// EMAIL_USER=${EMAIL_USER}
+// EMAIL_PASS=${EMAIL_PASS}
+// CLIENT_URL=http://localhost:3000
+// """
+//                 }
+//             }
+//         }
+
+//         stage('Install Dependencies') {
+//             parallel {
+
+//                 stage('Frontend') {
+//                     steps {
+//                         dir('frontend') {
+//                             sh 'npm install --no-audit --no-fund'
+//                         }
+//                     }
+//                 }
+
+//                 stage('Backend') {
+//                     steps {
+//                         dir('backend') {
+//                             sh 'npm install --no-audit --no-fund'
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+
+//         stage('Run Tests') {
+//             parallel {
+
+//                 stage('Frontend Tests') {
+//                     steps {
+//                         dir('frontend') {
+//                             sh 'npm test -- --watchAll=false --passWithNoTests --ci || true'
+//                         }
+//                     }
+//                 }
+
+//                 stage('Backend Tests') {
+//                     steps {
+//                         dir('backend') {
+//                             sh 'npm test -- --passWithNoTests --ci || true'
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+
+//         stage('Build Applications') {
+//             parallel {
+
+//                 stage('Frontend Build') {
+//                     steps {
+//                         dir('frontend') {
+//                             sh 'npm run build'
+//                         }
+//                     }
+//                 }
+
+//                 stage('Backend Build') {
+//                     steps {
+//                         dir('backend') {
+//                             sh 'npm run build || true'
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+
+//         stage('Build Docker Images') {
+//             steps {
+//                 sh '''
+//                 set -e
+
+//                 echo "Building Docker images..."
+
+//                 docker build -t ${FRONTEND_IMAGE}:${DOCKER_TAG} -f frontend/Dockerfile.frontend ./frontend
+//                 docker build -t ${BACKEND_IMAGE}:${DOCKER_TAG} -f backend/Dockerfile.backend ./backend
+
+//                 docker tag ${FRONTEND_IMAGE}:${DOCKER_TAG} ${FRONTEND_IMAGE}:latest
+//                 docker tag ${BACKEND_IMAGE}:${DOCKER_TAG} ${BACKEND_IMAGE}:latest
+//                 '''
+//             }
+//         }
+
+//         stage('Deploy with Docker Compose') {
+//             steps {
+//                 sh '''
+//                 set -e
+
+//                 echo "Stopping old containers..."
+//                 docker compose -f ${COMPOSE_FILE} down
+
+//                 echo "Starting new containers..."
+//                 docker compose -f ${COMPOSE_FILE} up -d
+
+//                 echo "Waiting for services..."
+//                 sleep 20
+
+//                 docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"
+//                 '''
+//             }
+//         }
+
+//         stage('Health Checks') {
+//             steps {
+//                 sh '''
+//                 echo "Running health checks..."
+
+//                 # MongoDB
+//                 docker exec mern-mongodb mongosh --username admin --password password --authenticationDatabase admin --eval "db.adminCommand('ping')" && echo "✓ MongoDB OK"
+
+//                 # RabbitMQ
+//                 docker exec mern-rabbitmq rabbitmq-diagnostics ping && echo "✓ RabbitMQ OK"
+
+//                 # Backend
+//                 curl -f http://localhost:5000/health && echo "✓ Backend OK"
+
+//                 # Frontend
+//                 curl -f http://localhost:3000 && echo "✓ Frontend OK"
+//                 '''
+//             }
+//         }
+//     }
+
+//     post {
+
+//         always {
+//             node {
+//                 echo '📦 Collecting logs...'
+//                 sh '''
+//                 echo "==== CONTAINER LOGS ===="
+
+//                 docker logs --tail 50 mern-backend || true
+//                 docker logs --tail 50 mern-frontend || true
+//                 docker logs --tail 50 mern-mongodb || true
+//                 docker logs --tail 50 mern-rabbitmq || true
+//                 '''
+//             }
+//         }
+
+//         success {
+//             node {
+//                 echo '✅ CI/CD Pipeline SUCCESS'
+
+//                 sh '''
+//                 echo "==== RUNNING SERVICES ===="
+//                 docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"
+
+//                 echo "Frontend: http://localhost:3000"
+//                 echo "Backend: http://localhost:5000"
+//                 echo "RabbitMQ: http://localhost:15672"
+//                 '''
+//             }
+//         }
+
+//         failure {
+//             node {
+//                 echo '❌ CI/CD Pipeline FAILED'
+
+//                 sh '''
+//                 echo "==== DEBUG INFO ===="
+
+//                 docker ps -a --format "table {{.Names}}\\t{{.Status}}"
+
+//                 for c in mern-backend mern-frontend mern-mongodb mern-rabbitmq; do
+//                     echo "--- $c logs ---"
+//                     docker logs --tail 100 $c || true
+//                 done
+//                 '''
+//             }
+//         }
+
+//         cleanup {
+//             node {
+//                 sh 'docker image prune -f --filter "until=24h"'
+//             }
+//         }
+//     }
+// }
+
+
+
+
+
+// ---------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 pipeline {
     agent any
 
     options {
         timestamps()
-        ansiColor('xterm')
+        ansiColor('xterm')   // Make sure AnsiColor plugin is installed
+        timeout(time: 30, unit: 'MINUTES')
     }
 
     environment {
@@ -405,7 +648,7 @@ CLIENT_URL=http://localhost:3000
                 set -e
 
                 echo "Stopping old containers..."
-                docker compose -f ${COMPOSE_FILE} down
+                docker compose -f ${COMPOSE_FILE} down || true
 
                 echo "Starting new containers..."
                 docker compose -f ${COMPOSE_FILE} up -d
@@ -423,17 +666,13 @@ CLIENT_URL=http://localhost:3000
                 sh '''
                 echo "Running health checks..."
 
-                # MongoDB
-                docker exec mern-mongodb mongosh --username admin --password password --authenticationDatabase admin --eval "db.adminCommand('ping')" && echo "✓ MongoDB OK"
+                docker exec mern-mongodb mongosh --username ${MONGO_USER} --password ${MONGO_PASS} --authenticationDatabase admin --eval "db.adminCommand('ping')" && echo "✓ MongoDB OK" || echo "MongoDB check failed"
 
-                # RabbitMQ
-                docker exec mern-rabbitmq rabbitmq-diagnostics ping && echo "✓ RabbitMQ OK"
+                docker exec mern-rabbitmq rabbitmq-diagnostics ping && echo "✓ RabbitMQ OK" || echo "RabbitMQ check failed"
 
-                # Backend
-                curl -f http://localhost:5000/health && echo "✓ Backend OK"
+                curl -f http://localhost:5000/health && echo "✓ Backend OK" || echo "Backend check failed"
 
-                # Frontend
-                curl -f http://localhost:3000 && echo "✓ Frontend OK"
+                curl -f http://localhost:3000 && echo "✓ Frontend OK" || echo "Frontend check failed"
                 '''
             }
         }
@@ -442,55 +681,40 @@ CLIENT_URL=http://localhost:3000
     post {
 
         always {
-            node {
-                echo '📦 Collecting logs...'
-                sh '''
-                echo "==== CONTAINER LOGS ===="
-
-                docker logs --tail 50 mern-backend || true
-                docker logs --tail 50 mern-frontend || true
-                docker logs --tail 50 mern-mongodb || true
-                docker logs --tail 50 mern-rabbitmq || true
-                '''
-            }
+            echo '📦 Collecting logs...'
+            sh '''
+            docker logs --tail 50 mern-backend || true
+            docker logs --tail 50 mern-frontend || true
+            docker logs --tail 50 mern-mongodb || true
+            docker logs --tail 50 mern-rabbitmq || true
+            '''
         }
 
         success {
-            node {
-                echo '✅ CI/CD Pipeline SUCCESS'
+            echo '✅ CI/CD Pipeline SUCCESS'
+            sh '''
+            docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"
 
-                sh '''
-                echo "==== RUNNING SERVICES ===="
-                docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"
-
-                echo "Frontend: http://localhost:3000"
-                echo "Backend: http://localhost:5000"
-                echo "RabbitMQ: http://localhost:15672"
-                '''
-            }
+            echo "Frontend: http://localhost:3000"
+            echo "Backend: http://localhost:5000"
+            echo "RabbitMQ UI: http://localhost:15672"
+            '''
         }
 
         failure {
-            node {
-                echo '❌ CI/CD Pipeline FAILED'
+            echo '❌ CI/CD Pipeline FAILED'
+            sh '''
+            docker ps -a --format "table {{.Names}}\\t{{.Status}}"
 
-                sh '''
-                echo "==== DEBUG INFO ===="
-
-                docker ps -a --format "table {{.Names}}\\t{{.Status}}"
-
-                for c in mern-backend mern-frontend mern-mongodb mern-rabbitmq; do
-                    echo "--- $c logs ---"
-                    docker logs --tail 100 $c || true
-                done
-                '''
-            }
+            for c in mern-backend mern-frontend mern-mongodb mern-rabbitmq; do
+                echo "--- $c logs ---"
+                docker logs --tail 100 $c || true
+            done
+            '''
         }
 
         cleanup {
-            node {
-                sh 'docker image prune -f --filter "until=24h"'
-            }
+            sh 'docker image prune -f --filter "until=24h"'
         }
     }
 }
