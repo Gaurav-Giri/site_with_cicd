@@ -648,10 +648,10 @@ CLIENT_URL=http://localhost:3000
                 set -e
 
                 echo "Stopping old containers..."
-                docker compose -f ${COMPOSE_FILE} down || true
+                docker-compose -f ${COMPOSE_FILE} down || true
 
                 echo "Starting new containers..."
-                docker compose -f ${COMPOSE_FILE} up -d
+                docker-compose -f ${COMPOSE_FILE} up -d
 
                 echo "Waiting for services..."
                 sleep 20
