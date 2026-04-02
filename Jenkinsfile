@@ -666,9 +666,9 @@ CLIENT_URL=http://localhost:3000
                 sh '''
                 echo "Running health checks..."
 
-                docker exec mern-mongodb mongosh --username ${MONGO_USER} --password ${MONGO_PASS} --authenticationDatabase admin --eval "db.adminCommand('ping')" && echo "✓ MongoDB OK" || echo "MongoDB check failed"
+                docker exec mongodb mongosh --username ${MONGO_USER} --password ${MONGO_PASS} --authenticationDatabase admin --eval "db.adminCommand('ping')" && echo "✓ MongoDB OK" || echo "MongoDB check failed"
 
-                docker exec mern-rabbitmq rabbitmq-diagnostics ping && echo "✓ RabbitMQ OK" || echo "RabbitMQ check failed"
+                docker exec rabbitmq rabbitmq-diagnostics ping && echo "✓ RabbitMQ OK" || echo "RabbitMQ check failed"
 
                 curl -f http://localhost:5000/health && echo "✓ Backend OK" || echo "Backend check failed"
 
@@ -683,10 +683,10 @@ CLIENT_URL=http://localhost:3000
         always {
             echo '📦 Collecting logs...'
             sh '''
-            docker logs --tail 50 mern-backend || true
-            docker logs --tail 50 mern-frontend || true
-            docker logs --tail 50 mern-mongodb || true
-            docker logs --tail 50 mern-rabbitmq || true
+            docker logs --tail 50 backend || true
+            docker logs --tail 50 frontend || true
+            docker logs --tail 50 mongodb || true
+            docker logs --tail 50 rabbitmq || true
             '''
         }
 
@@ -706,7 +706,7 @@ CLIENT_URL=http://localhost:3000
             sh '''
             docker ps -a --format "table {{.Names}}\\t{{.Status}}"
 
-            for c in mern-backend mern-frontend mern-mongodb mern-rabbitmq; do
+            for c in backend frontend mongodb rabbitmq; do
                 echo "--- $c logs ---"
                 docker logs --tail 100 $c || true
             done
