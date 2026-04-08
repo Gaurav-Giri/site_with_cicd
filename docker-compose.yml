@@ -161,9 +161,9 @@ services:
       start_period: 40s
 
 volumes:
-  mongo_data:
+  mongodb_data:
     external: true
-    name: mongo_data
+    name: mongodb_data
   rabbitmq_data:
     external: true
     name: rabbitmq_data
