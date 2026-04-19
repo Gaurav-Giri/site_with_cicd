@@ -552,7 +552,7 @@ REACT_APP_WS_URL=ws://localhost:5000
                     writeFile file: 'backend/.env', text: """
 NODE_ENV=production
 PORT=5000
-MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017/gmail_auth?authSource=admin
+MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017/gmail_auth?authSource=admin
 RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
 JWT_SECRET=${JWT_SECRET}
 EMAIL_USER=${EMAIL_USER}

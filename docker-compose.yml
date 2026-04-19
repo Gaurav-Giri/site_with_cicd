@@ -222,7 +222,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5000
-      - MONGODB_URI=mongodb://admin:password@mongodb:27017/gmail_auth?authSource=admin
+      - MONGO_URI=mongodb://admin:password@mongodb:27017/gmail_auth?authSource=admin
       - RABBITMQ_URL=amqp://admin:password@rabbitmq:5672
       - JWT_SECRET=${JWT_SECRET}
       - EMAIL_USER=${EMAIL_USER}
