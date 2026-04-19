@@ -41,14 +41,14 @@ export default defineConfig({
     proxy: {
       // API proxy - use relative path
       '/api': {
-        target: 'http://localhost:5000', // Always proxy to local backend
+        target: 'http://backend:5000', // Always proxy to local backend
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api')
       },
       // WebSocket proxy for Socket.io
       '/socket.io': {
-        target: 'ws://localhost:5000', // Use ws:// for WebSocket
+        target: 'ws://backend:5000', // Use ws:// for WebSocket
         changeOrigin: true,
         secure: false,
         ws: true, // Enable WebSocket proxy
